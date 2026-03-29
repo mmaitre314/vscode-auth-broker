@@ -5,23 +5,20 @@ Entra authentication broker for VSCode Dev Containers. Runs a local HTTP server 
 ## Quick Start
 
 1. Install the extension in VSCode.
-2. Add the following to your Dev Container's `devcontainer.json` (see [`.devcontainer/devcontainer.json`](.devcontainer/devcontainer.json) for a full example):
-
-```json
-"remoteEnv": {
-  "IDENTITY_ENDPOINT": "http://host.docker.internal:40342/oauth2/token",
-  "IDENTITY_HEADER": "AuthBrokerServer"
-}
-```
-
+2. Add the following to your Dev Container's `devcontainer.json` (see [`.devcontainer/devcontainer.json`](https://github.com/mmaitre314/vscode-auth-broker/blob/main/.devcontainer/devcontainer.json) for a full example):
+  ```json
+  "remoteEnv": {
+    "IDENTITY_ENDPOINT": "http://host.docker.internal:40342/oauth2/token",
+    "IDENTITY_HEADER": "AuthBrokerServer"
+  }
+  ```
 3. In the container, use `ManagedIdentityCredential` as usual:
+  ```python
+  from azure.identity import ManagedIdentityCredential
 
-```python
-from azure.identity import ManagedIdentityCredential
-
-credential = ManagedIdentityCredential()
-token = credential.get_token("https://graph.microsoft.com/.default")
-```
+  credential = ManagedIdentityCredential()
+  token = credential.get_token("https://graph.microsoft.com/.default")
+  ```
 
 ## How It Works
 
@@ -75,8 +72,8 @@ Returns a JSON object with an access token for the requested resource.
 
 ```json
 {
-    "access_token": "eyJ0eXAiOiJKV1QiL...",
-    "expires_on": 1700000000
+  "access_token": "eyJ0eXAiOiJKV1QiL...",
+  "expires_on": 1700000000
 }
 ```
 
@@ -84,8 +81,8 @@ Returns a JSON object with an access token for the requested resource.
 
 ```json
 {
-    "error": "invalid_resource",
-    "error_description": "Missing required query parameter: resource"
+  "error": "invalid_resource",
+  "error_description": "Missing required query parameter: resource"
 }
 ```
 
