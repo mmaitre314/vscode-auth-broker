@@ -1,4 +1,4 @@
-# Auth Broker — VSCode Extension
+# VSCode Auth Broker
 
 Entra authentication broker for VSCode Dev Containers. Runs a local HTTP server on the host that serves device-bound access tokens (with Token Protection) to `ManagedIdentityCredential` inside containers.
 
@@ -6,19 +6,19 @@ Entra authentication broker for VSCode Dev Containers. Runs a local HTTP server 
 
 1. Install the extension in VSCode.
 2. Add the following to your Dev Container's `devcontainer.json` (see [`.devcontainer/devcontainer.json`](https://github.com/mmaitre314/vscode-auth-broker/blob/main/.devcontainer/devcontainer.json) for a full example):
-  ```json
-  "remoteEnv": {
-    "IDENTITY_ENDPOINT": "http://host.docker.internal:40342/oauth2/token",
-    "IDENTITY_HEADER": "AuthBrokerServer"
-  }
-  ```
+    ```json
+    "remoteEnv": {
+      "IDENTITY_ENDPOINT": "http://host.docker.internal:40342/oauth2/token",
+      "IDENTITY_HEADER": "AuthBrokerServer"
+    }
+    ```
 3. In the container, use `ManagedIdentityCredential` as usual:
-  ```python
-  from azure.identity import ManagedIdentityCredential
+    ```python
+    from azure.identity import ManagedIdentityCredential
 
-  credential = ManagedIdentityCredential()
-  token = credential.get_token("https://graph.microsoft.com/.default")
-  ```
+    credential = ManagedIdentityCredential()
+    token = credential.get_token("https://graph.microsoft.com/.default")
+    ```
 
 ## How It Works
 
