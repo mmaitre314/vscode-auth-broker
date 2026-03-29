@@ -1,0 +1,90 @@
+{
+  "name": "vscode-auth-broker",
+  "displayName": "Auth Broker",
+  "description": "Entra authentication broker for VSCode Dev Containers — serves device-bound access tokens to ManagedIdentityCredential inside containers.",
+  "version": "1.0.28",
+  "publisher": "mmaitre314",
+  "icon": "media/icon.png",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mmaitre314/vscode-auth-broker"
+  },
+  "engines": {
+    "vscode": "^1.96.0"
+  },
+  "extensionKind": [
+    "ui"
+  ],
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "entra",
+    "authentication",
+    "broker",
+    "devcontainer",
+    "managed identity",
+    "token protection",
+    "WAM"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "vscode-auth-broker.start",
+        "title": "Auth Broker: Start Server"
+      },
+      {
+        "command": "vscode-auth-broker.stop",
+        "title": "Auth Broker: Stop Server"
+      },
+      {
+        "command": "vscode-auth-broker.copyDevContainerConfig",
+        "title": "Auth Broker: Copy Dev Container Config"
+      }
+    ],
+    "configuration": {
+      "title": "Auth Broker",
+      "properties": {
+        "authBroker.port": {
+          "type": "number",
+          "default": 40342,
+          "description": "TCP port the auth broker HTTP server listens on."
+        },
+        "authBroker.identityHeader": {
+          "type": "string",
+          "default": "AuthBrokerServer",
+          "description": "Expected value of the X-IDENTITY-HEADER request header."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "start:broker": "node dist/auth-broker-process.js",
+    "pretest": "npm run compile",
+    "test": "node --import tsx --test src/test/server.test.ts",
+    "test:integration": "node --import tsx --test src/test/integration.test.ts",
+    "lint": "tsc --noEmit",
+    "package": "vsce package",
+    "vscode:prepublish": "node esbuild.js --production"
+  },
+  "dependencies": {
+    "@azure/msal-node": "^3.8.0",
+    "@azure/msal-node-extensions": "^1.5.0"
+  },
+  "devDependencies": {
+    "@azure/identity": "^4.13.0",
+    "@types/node": "^22.0.0",
+    "@types/vscode": "^1.96.0",
+    "@vscode/vsce": "^3.0.0",
+    "esbuild": "^0.24.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.7.0"
+  }
+}

@@ -1,0 +1,16 @@
+{
+    "name": "vscode-auth-broker",
+    "image": "mcr.microsoft.com/devcontainers/typescript-node:22",
+    "postCreateCommand": "npm install",
+    "remoteEnv": {
+        "IDENTITY_ENDPOINT": "http://host.docker.internal:40342/oauth2/token",
+        "IDENTITY_HEADER": "AuthBrokerServer"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "dbaeumer.vscode-eslint"
+            ]
+        }
+    }
+}

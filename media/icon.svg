@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0078D4"/>
+      <stop offset="100%" style="stop-color:#005A9E"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded background -->
+  <rect x="4" y="4" width="120" height="120" rx="24" ry="24" fill="url(#bg)"/>
+  <!-- Shield outline -->
+  <path d="M64 22 L96 36 L96 62 C96 82 82 98 64 106 C46 98 32 82 32 62 L32 36 Z"
+        fill="none" stroke="white" stroke-width="4" stroke-linejoin="round"/>
+  <!-- Key symbol inside shield -->
+  <!-- Key head (circle) -->
+  <circle cx="64" cy="52" r="10" fill="none" stroke="white" stroke-width="3.5"/>
+  <!-- Key shaft -->
+  <line x1="64" y1="62" x2="64" y2="84" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Key teeth -->
+  <line x1="64" y1="76" x2="72" y2="76" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="64" y1="84" x2="70" y2="84" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
+</svg>

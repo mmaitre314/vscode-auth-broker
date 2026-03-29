@@ -1,0 +1,16 @@
+.devcontainer/
+.github/
+.vscode-test/
+media/*.svg
+node_modules/
+!node_modules/@azure/msal-node-runtime/package.json
+!node_modules/@azure/msal-node-runtime/dist/linux/
+!node_modules/@azure/msal-node-runtime/dist/macos/
+!node_modules/@azure/msal-node-runtime/dist/windows/
+!node_modules/@azure/msal-node-runtime/dist/index*.*
+src/
+.gitignore
+*.vsix
+*.zip
+esbuild.js
+tsconfig.json
