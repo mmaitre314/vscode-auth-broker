@@ -112,13 +112,8 @@ code --install-extension vscode-auth-broker-*.vsix
 
 ## Publishing
 
-Publish to the [VS Code Marketplace](https://marketplace.visualstudio.com/) using `vsce`:
-
-```bash
-npx vsce publish
-```
-
-This requires a [Personal Access Token](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token) for the `mmaitre314` publisher.
+- Download the VSIX from GitHub Releases https://github.com/mmaitre314/vscode-auth-broker/releases
+- Upload the VSIX to Visual Studio Marketplace https://marketplace.visualstudio.com/manage/publishers/mmaitre314
 
 ## Project Structure
 
