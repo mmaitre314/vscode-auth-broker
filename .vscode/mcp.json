@@ -1,0 +1,13 @@
+{
+    "servers": {
+        "github": {
+            "type": "http",
+            "url": "https://api.githubcopilot.com/mcp/"
+        },
+        "gh-security_advisories": {
+            "type": "http",
+            "url": "https://api.githubcopilot.com/mcp/x/security_advisories/readonly"
+        }
+    },
+    "inputs": []
+}

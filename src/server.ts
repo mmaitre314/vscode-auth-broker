@@ -220,29 +220,6 @@ export class AuthBrokerServer {
   }
     
   private async getTokenClient(clientId: string): Promise<IPublicClientApplication> {
-    if (!brokerPlugin) {
-      this.logger.info("Initializing NativeBrokerPlugin for token acquisition");
-
-      // Delay-load msal-node-extensions to avoid having to install libsecret-1.so.0 to run unit tests
-      const { NativeBrokerPlugin } = await import("@azure/msal-node-extensions");
-      brokerPlugin = new NativeBrokerPlugin();
-      if (!brokerPlugin.isBrokerAvailable) {
-        // Log the reason for unavailability if possible
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-require-imports
-          const msalNodeRuntime = require("@azure/msal-node-runtime") as {
-            msalNodeRuntime?: { StartupError?: unknown };
-          };
-          const startupError = msalNodeRuntime.msalNodeRuntime?.StartupError;
-          this.logger.error(
-            `Native broker is not available: ${startupError ? JSON.stringify(startupError) : "unknown error"}`,
-          );
-        } catch {
-          this.logger.error("Native broker is not available and @azure/msal-node-runtime could not be loaded");
-        }
-      }
-    }
-
     let pca = this.tokenClients.get(clientId);
     if (!pca) {
       this.logger.info(`Creating new PublicClientApplication for clientId=${clientId}`);
@@ -250,6 +227,29 @@ export class AuthBrokerServer {
       if (this.createClient) {
         pca = this.createClient(clientId);
       } else {
+        if (!brokerPlugin) {
+          this.logger.info("Initializing NativeBrokerPlugin for token acquisition");
+
+          // Delay-load msal-node-extensions to avoid having to install libsecret-1.so.0 to run unit tests
+          const { NativeBrokerPlugin } = await import("@azure/msal-node-extensions");
+          brokerPlugin = new NativeBrokerPlugin();
+          if (!brokerPlugin.isBrokerAvailable) {
+            // Log the reason for unavailability if possible
+            try {
+              // eslint-disable-next-line @typescript-eslint/no-require-imports
+              const msalNodeRuntime = require("@azure/msal-node-runtime") as {
+                msalNodeRuntime?: { StartupError?: unknown };
+              };
+              const startupError = msalNodeRuntime.msalNodeRuntime?.StartupError;
+              this.logger.error(
+                `Native broker is not available: ${startupError ? JSON.stringify(startupError) : "unknown error"}`,
+              );
+            } catch {
+              this.logger.error("Native broker is not available and @azure/msal-node-runtime could not be loaded");
+            }
+          }
+        }
+
         pca = new PublicClientApplication({
           auth: { clientId },
           broker: { nativeBrokerPlugin: brokerPlugin },
