@@ -25,11 +25,11 @@ jobs:
 
       - run: npm test
 
-      - run: npx vsce package --no-dependencies
+      - run: npx vsce package
         if: github.ref == 'refs/heads/main'
 
       - uses: actions/upload-artifact@v7
         if: github.ref == 'refs/heads/main'
         with:
-          name: vsix
-          path: "*.vsix"
+          path: vscode-auth-broker-*.vsix
+          if-no-files-found: error
