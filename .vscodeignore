@@ -1,5 +1,6 @@
 .devcontainer/
 .github/
+.vscode/
 .vscode-test/
 media/*.svg
 node_modules/
