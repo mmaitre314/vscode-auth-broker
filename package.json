@@ -2,7 +2,7 @@
   "name": "vscode-auth-broker",
   "displayName": "Auth Broker",
   "description": "Entra authentication broker for VSCode Dev Containers — serves device-bound access tokens to ManagedIdentityCredential inside containers.",
-  "version": "1.0.28",
+  "version": "1.0.29",
   "publisher": "mmaitre314",
   "icon": "media/icon.png",
   "license": "MIT",

@@ -137,7 +137,6 @@ async function startServer() {
 
   try {
     startBrokerProcess(port, identityHeader);
-    restartCount = 0;
     updateStatusBar(true, port);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
@@ -206,7 +205,10 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(statusBarItem);
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("vscode-auth-broker.start", startServer),
+    vscode.commands.registerCommand("vscode-auth-broker.start", () => {
+      restartCount = 0;
+      return startServer();
+    }),
     vscode.commands.registerCommand("vscode-auth-broker.stop", stopServer),
     vscode.commands.registerCommand(
       "vscode-auth-broker.copyDevContainerConfig",
@@ -215,6 +217,7 @@ export async function activate(context: vscode.ExtensionContext) {
   );
 
   // Auto-start on activation
+  restartCount = 0;
   await startServer();
 }
 
