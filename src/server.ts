@@ -1,7 +1,6 @@
 import * as http from "node:http";
 import { URL } from "node:url";
 import { PublicClientApplication, IPublicClientApplication, LogLevel } from "@azure/msal-node";
-import { NativeBrokerPlugin } from "@azure/msal-node-extensions";
 
 const DEFAULT_CLIENT_ID = "04b07795-8ddb-461a-bbee-02f9e1bf7b46"; // Azure CLI
 
@@ -51,7 +50,8 @@ function sendError(
   sendJson(res, statusCode, { error, error_description: description });
 }
 
-let brokerPlugin: NativeBrokerPlugin | undefined;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let brokerPlugin: any;
 
 export class AuthBrokerServer {
   private server: http.Server | null = null;
@@ -202,7 +202,7 @@ export class AuthBrokerServer {
 
     this.logger.info(`Token request: clientId=${clientId}, scope=${scope}`);
 
-    const client = this.getTokenClient(clientId);
+    const client = await this.getTokenClient(clientId);
 
     this.logger.debug(`Attempting token acquisition`);
     let result;
@@ -219,10 +219,12 @@ export class AuthBrokerServer {
     sendJson(res, 200, { access_token: result.accessToken, expires_on: expiresOn });
   }
     
-  private getTokenClient(clientId: string): IPublicClientApplication {
+  private async getTokenClient(clientId: string): Promise<IPublicClientApplication> {
     if (!brokerPlugin) {
       this.logger.info("Initializing NativeBrokerPlugin for token acquisition");
 
+      // Delay-load msal-node-extensions to avoid having to install libsecret-1.so.0 to run unit tests
+      const { NativeBrokerPlugin } = await import("@azure/msal-node-extensions");
       brokerPlugin = new NativeBrokerPlugin();
       if (!brokerPlugin.isBrokerAvailable) {
         // Log the reason for unavailability if possible
