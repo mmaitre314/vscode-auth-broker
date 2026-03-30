@@ -263,4 +263,106 @@ describe("AuthBrokerServer", () => {
   it("binds to 127.0.0.1", () => {
     assert.equal(server.address, "127.0.0.1");
   });
+
+  // -- Health endpoint -------------------------------------------------------
+
+  it("/health returns port and identityHeader", async () => {
+    const { status, body } = await get(server.port, "/health");
+    const data = JSON.parse(body);
+
+    assert.equal(status, 200);
+    assert.equal(data.port, server.port);
+    assert.equal(data.identityHeader, IDENTITY_HEADER);
+  });
+});
+
+// -- checkExistingServer logic -----------------------------------------------
+
+/**
+ * Mirrors the checkExistingServer function in extension.ts so the
+ * health-check round-trip can be verified without importing vscode.
+ */
+function checkExistingServer(
+  port: number,
+  expectedIdentityHeader: string,
+): Promise<boolean> {
+  return new Promise((resolve) => {
+    const req = http.get(
+      `http://127.0.0.1:${port}/health`,
+      { timeout: 3000 },
+      (res) => {
+        let data = "";
+        res.on("data", (chunk) => {
+          data += chunk;
+        });
+        res.on("end", () => {
+          try {
+            const body = JSON.parse(data);
+            resolve(
+              res.statusCode === 200 &&
+                body.identityHeader === expectedIdentityHeader,
+            );
+          } catch {
+            resolve(false);
+          }
+        });
+      },
+    );
+    req.on("error", () => resolve(false));
+    req.on("timeout", () => {
+      req.destroy();
+      resolve(false);
+    });
+  });
+}
+
+describe("checkExistingServer", () => {
+  let server: AuthBrokerServer;
+
+  beforeEach(async () => {
+    server = new AuthBrokerServer({
+      port: 0,
+      identityHeader: IDENTITY_HEADER,
+      createClient: (() => createMockClient()) as any,
+    });
+    await server.start();
+  });
+
+  afterEach(async () => {
+    await server.stop();
+  });
+
+  it("returns true when identityHeader matches", async () => {
+    const result = await checkExistingServer(server.port, IDENTITY_HEADER);
+    assert.equal(result, true);
+  });
+
+  it("returns false when identityHeader does not match", async () => {
+    const result = await checkExistingServer(server.port, "WrongHeader");
+    assert.equal(result, false);
+  });
+
+  it("returns false when no server is running", async () => {
+    const result = await checkExistingServer(19999, IDENTITY_HEADER);
+    assert.equal(result, false);
+  });
+
+  it("returns false when server returns non-JSON", async () => {
+    // Start a plain HTTP server that returns garbage
+    const fake = http.createServer((_req, res) => {
+      res.writeHead(200);
+      res.end("not json");
+    });
+    await new Promise<void>((resolve) => fake.listen(0, "127.0.0.1", resolve));
+    const addr = fake.address() as { port: number };
+
+    try {
+      const result = await checkExistingServer(addr.port, IDENTITY_HEADER);
+      assert.equal(result, false);
+    } finally {
+      await new Promise<void>((resolve, reject) =>
+        fake.close((err) => (err ? reject(err) : resolve())),
+      );
+    }
+  });
 });

@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { spawn, type ChildProcess } from "node:child_process";
+import * as http from "node:http";
 import * as path from "node:path";
 import * as readline from "node:readline";
 
@@ -71,6 +72,28 @@ function processLine(line: string): void {
   }
 }
 
+// --- Health check -----------------------------------------------------------
+
+/** Check whether another Auth Broker is already listening on the given port. */
+function checkExistingServer(port: number, expectedIdentityHeader: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    const req = http.get(`http://127.0.0.1:${port}/health`, { timeout: 3000 }, (res) => {
+      let data = "";
+      res.on("data", (chunk) => { data += chunk; });
+      res.on("end", () => {
+        try {
+          const body = JSON.parse(data);
+          resolve(res.statusCode === 200 && body.identityHeader === expectedIdentityHeader);
+        } catch {
+          resolve(false);
+        }
+      });
+    });
+    req.on("error", () => resolve(false));
+    req.on("timeout", () => { req.destroy(); resolve(false); });
+  });
+}
+
 // --- Process management -----------------------------------------------------
 
 function startBrokerProcess(port: number, identityHeader: string): void {
@@ -110,15 +133,34 @@ function startBrokerProcess(port: number, identityHeader: string): void {
 
     log?.warn(`Broker process exited unexpectedly (code=${code}, signal=${signal})`);
 
-    if (restartCount < MAX_RESTARTS) {
-      restartCount++;
-      log?.info(`Restarting broker process (attempt ${restartCount}/${MAX_RESTARTS})...`);
-      setTimeout(() => startServer(), RESTART_DELAY_MS);
+    const scheduleRestart = () => {
+      if (restartCount < MAX_RESTARTS) {
+        restartCount++;
+        log?.info(`Restarting broker process (attempt ${restartCount}/${MAX_RESTARTS})...`);
+        setTimeout(() => startServer(), RESTART_DELAY_MS);
+      } else {
+        log?.error(`Broker process crashed ${MAX_RESTARTS} times — not restarting`);
+        vscode.window.showErrorMessage(
+          "Auth Broker process crashed repeatedly. Check the Auth Broker output for details.",
+        );
+      }
+    };
+
+    if (code === 2) {
+      // Exit code 2 = server start failure (e.g. EADDRINUSE).
+      // Check if another Auth Broker instance owns the port.
+      const { port, identityHeader } = getConfig();
+      checkExistingServer(port, identityHeader).then((alreadyRunning) => {
+        if (alreadyRunning) {
+          log?.info(
+            `Another Auth Broker is already running on port ${port} — not restarting`,
+          );
+          return;
+        }
+        scheduleRestart();
+      });
     } else {
-      log?.error(`Broker process crashed ${MAX_RESTARTS} times — not restarting`);
-      vscode.window.showErrorMessage(
-        "Auth Broker process crashed repeatedly. Check the Auth Broker output for details.",
-      );
+      scheduleRestart();
     }
   });
 }
